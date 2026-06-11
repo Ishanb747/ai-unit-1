@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Unit 1 Interactive Study Site</title>
+  <style>
+    :root {
+      --ink: #172026;
+      --muted: #5c6870;
+      --line: #d8e0e3;
+      --paper: #fbfcf8;
+      --panel: #ffffff;
+      --green: #0f7a62;
+      --blue: #245c9e;
+      --red: #b33b3b;
+      --gold: #a46b12;
+      --aqua: #e6f5f1;
+      --sky: #eaf2fb;
+      --rose: #faeeee;
+      --sun: #fff4d8;
+      --shadow: 0 18px 45px rgba(23, 32, 38, .10);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #f7faf8 0, #f7f8fb 42%, #fffaf0 100%);
+      letter-spacing: 0;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 292px minmax(0, 1fr);
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 18px;
+      height: calc(100vh - 36px);
+      overflow: auto;
+      background: rgba(255, 255, 255, .86);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar { padding: 16px; }
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background: conic-gradient(from 20deg, var(--green), var(--blue), var(--gold), var(--red), var(--green));
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 800;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.6);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .search {
+      margin: 14px 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .search label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .search input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 11px 12px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr 42px;
+      gap: 8px;
+    }
+
+    .clear-search {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--muted);
+      font-weight: 900;
+      min-height: 42px;
+    }
+
+    .topic-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .topic-btn {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 7px;
+      padding: 11px;
+      display: grid;
+      grid-template-columns: 30px 1fr auto;
+      gap: 9px;
+      align-items: center;
+      text-align: left;
+      color: var(--ink);
+    }
+
+    .topic-btn.active {
+      border-color: var(--green);
+      background: var(--aqua);
+    }
+
+    .topic-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      background: #eef4f2;
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .topic-btn:nth-child(2n) .topic-icon { background: var(--sky); color: var(--blue); }
+    .topic-btn:nth-child(3n) .topic-icon { background: var(--sun); color: var(--gold); }
+    .topic-btn:nth-child(4n) .topic-icon { background: var(--rose); color: var(--red); }
+
+    .topic-name { font-weight: 800; font-size: 14px; }
+    .topic-meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .count {
+      min-width: 26px;
+      min-height: 26px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #edf1f2;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      gap: 18px;
+    }
+
+    .topbar {
+      background: rgba(255,255,255,.88);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 14px;
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      flex-wrap: wrap;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    .source-note {
+      max-width: 760px;
+      color: var(--muted);
+      margin: 6px 0 0;
+      line-height: 1.45;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tool {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 7px;
+      padding: 9px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 800;
+    }
+
+    .tool.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 24px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .lesson {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .topic-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .topic-head {
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: start;
+      background: linear-gradient(90deg, #fff, #f4faf7);
+    }
+
+    .topic-head h3 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.15;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 9px;
+    }
+
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      color: var(--muted);
+      background: #fff;
+      font-weight: 800;
+    }
+
+    .topic-body {
+      padding: 18px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .summary {
+      font-size: 17px;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .note-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .note-box h4 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .note-box ul {
+      margin: 0;
+      padding-left: 18px;
+      line-height: 1.55;
+    }
+
+    .note-box ol {
+      margin: 0;
+      padding-left: 20px;
+      line-height: 1.55;
+    }
+
+    .wide { grid-column: 1 / -1; }
+
+    .exam-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+      gap: 14px;
+    }
+
+    .source {
+      font-size: 12px;
+      color: var(--muted);
+      border-left: 3px solid var(--green);
+      padding: 8px 10px;
+      background: #f6fbf8;
+      border-radius: 0 7px 7px 0;
+    }
+
+    .diagram {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcfd;
+      display: grid;
+      gap: 12px;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      align-items: center;
+    }
+
+    .node {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      padding: 10px;
+      min-height: 68px;
+      display: grid;
+      align-content: center;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .arrow {
+      display: none;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h3 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .pyq-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 0;
+    }
+
+    .pyq-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      display: grid;
+      gap: 9px;
+    }
+
+    .pyq-card.hide { display: none; }
+    .pyq-q {
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .pyq-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .mini {
+      background: #f2f5f6;
+      border-radius: 999px;
+      padding: 4px 7px;
+      font-weight: 800;
+    }
+
+    .answer {
+      display: none;
+      color: #344047;
+      line-height: 1.45;
+      border-top: 1px dashed var(--line);
+      padding-top: 9px;
+      font-size: 15px;
+    }
+
+    .pyq-card.open .answer { display: block; }
+    .reveal {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 7px;
+      padding: 7px 9px;
+      justify-self: start;
+      font-weight: 800;
+    }
+
+    .quiz {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .quiz h3 { margin: 0; font-size: 22px; }
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .quiz-options button {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      text-align: left;
+      min-height: 58px;
+    }
+
+    .quiz-options button.correct { border-color: var(--green); background: var(--aqua); }
+    .quiz-options button.wrong { border-color: var(--red); background: var(--rose); }
+    .quiz-feedback { color: var(--muted); min-height: 24px; font-weight: 700; }
+
+    .empty {
+      display: none;
+      padding: 18px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: #fff;
+      text-align: center;
+    }
+
+    @media (max-width: 1180px) {
+      .shell { grid-template-columns: 250px minmax(0, 1fr); }
+      .pyq-list { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 820px) {
+      .shell { grid-template-columns: 1fr; padding: 10px; }
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+      .topic-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .metrics, .grid-2, .exam-grid, .quiz-options { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .topic-head { display: grid; }
+      .topbar h2 { font-size: 24px; }
+    }
+
+    @media (max-width: 520px) {
+      .topic-list { grid-template-columns: 1fr; }
+      .topic-btn { grid-template-columns: 30px 1fr; }
+      .count { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark">AI</div>
+        <div>
+          <h1>Unit 1 Studio</h1>
+          <p class="subtitle">From Aakash AI notes and handwritten Unit 1 PDF</p>
+        </div>
+      </div>
+
+      <div class="search">
+        <label for="search">Search topics and PYQs</label>
+        <div class="search-row">
+          <input id="search" placeholder="Try PEAS, hill climbing, state space">
+          <button class="clear-search" id="clearSearch" title="Clear search" aria-label="Clear search">X</button>
+        </div>
+      </div>
+
+      <div class="topic-list" id="topicList"></div>
+    </aside>
+
+    <main class="main">
+      <section class="topbar">
+        <div class="top-row">
+          <div>
+            <h2>Artificial Intelligence - Unit 1</h2>
+            <p class="source-note">Interactive teaching notes built only from the supplied scanned notes: AI definition, problems, foundations, techniques, models, state-space search, production systems, agents, and search design issues.</p>
+          </div>
+          <div class="toolbar" aria-label="View controls">
+            <button class="tool active" id="allBtn" title="Show all topics">All</button>
+            <button class="tool" id="pyqBtn" title="Jump to previous-year questions">PYQ</button>
+            <button class="tool" id="quizBtn" title="Jump to self-test">Quiz</button>
+          </div>
+        </div>
+        <div class="metrics">
+          <div class="metric"><strong id="topicCount">0</strong><span>topics</span></div>
+          <div class="metric"><strong id="questionCount">0</strong><span>mapped PYQs</span></div>
+          <div class="metric"><strong>2</strong><span>source PDFs</span></div>
+          <div class="metric"><strong>Unit 1</strong><span>10 hours in syllabus</span></div>
+        </div>
+      </section>
+
+      <section class="lesson" id="lesson"></section>
+      <div class="empty" id="empty">No matching topic or question. Try a broader search.</div>
+
+      <section class="quiz" id="quiz">
+        <h3>Quick Self-Test</h3>
+        <p class="source-note" id="quizQuestion"></p>
+        <div class="quiz-options" id="quizOptions"></div>
+        <div class="quiz-feedback" id="quizFeedback"></div>
+        <button class="tool" id="nextQuiz">Next question</button>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const topics = [
+      {
+        id: "ai-definition",
+        icon: "D",
+        title: "AI Definition, Problems, Foundations, Techniques, Models",
+        refs: "Handwritten pp. 1-7, Aakash pp. 7, 23, 39, 58, 85, 92",
+        summary: "Artificial Intelligence is presented in the notes as the creation of intelligent machines that work and react like humans, and as a computer science field that makes computers smart enough to learn, solve problems, and think logically.",
+        theory: [
+          "Start an answer by defining intelligence as the ability to reason, learn from experience, understand surroundings, and decide what action to take.",
+          "Then define AI as the computer-science and engineering field concerned with computational understanding of intelligent behavior and creating artifacts that exhibit such behavior.",
+          "The notes connect AI to human-like skills: learning, reasoning, problem solving, decision making, language understanding, perception, and acting.",
+          "Foundations should be named, not over-explained: computer science gives algorithms and representation; mathematics gives logic/probability; psychology and neuroscience motivate intelligent behavior; linguistics supports language work; philosophy supports reasoning and mind/intelligence questions.",
+          "When asked why AI is needed, use the notes' point that some real problems do not have practically feasible exact algorithms, so AI uses knowledge, learning, and heuristics to find useful solutions."
+        ],
+        bullets: [
+          "Intelligence includes reasoning, learning from experience, understanding surroundings, and deciding what to do.",
+          "AI draws from computer science, mathematics, linguistics, psychology, neuroscience, and philosophy.",
+          "AI is useful where normal practically feasible algorithms do not exist, especially when heuristics can guide a good or near-optimal answer.",
+          "Common AI areas in the notes include NLP, speech, machine learning in medicine, neural networks, Bayesian networks, and search-based techniques."
+        ],
+        key: [
+          "Strong AI aims at machines that can truly reason and possess intelligence.",
+          "Weak AI creates computer-based systems that help solve problems in a specific domain.",
+          "Problem solving in AI is a systematic search through possible actions to reach a goal."
+        ],
+        answerPlan: [
+          "Definition of intelligence and AI",
+          "Goals of AI: learn, solve problems, reason, think logically, act intelligently",
+          "Foundations and subfields",
+          "Techniques/models/examples from notes",
+          "Conclude with role of heuristics where exact algorithms are infeasible"
+        ],
+        keywords: ["intelligence", "learning", "reasoning", "heuristics", "strong AI", "weak AI", "Turing Test"],
+        mistakes: [
+          "Do not write only a one-line definition; add goal, foundations, and techniques.",
+          "Do not mix up strong AI and weak AI.",
+          "For Turing Test, mention interrogator, human, machine, and criticism/Chinese Room if asked."
+        ],
+        flow: ["Goal formulation", "Problem formulation", "Search", "Execute"]
+      },
+      {
+        id: "state-space",
+        icon: "S",
+        title: "Defining Problem as State Space Search",
+        refs: "Handwritten pp. 21-22, 48-51, Aakash pp. 39-40, 58, 84",
+        summary: "A problem can be represented as a state space: possible states, operators/actions, an initial state, and goal state. Search chooses a sequence of actions that reaches a goal.",
+        theory: [
+          "State-space search is a way to convert a problem into a graph of possible configurations. Each node is a state and each edge is an action/operator.",
+          "A complete formulation needs initial state, possible actions/operators, transition model, goal test, and path cost or evaluation criterion.",
+          "A solution is not just the final state; it is the ordered sequence of actions that transforms the initial state into a goal state.",
+          "Use the notes' examples to make the answer concrete: water jug states are jug quantities, N-queen states are board placements, 8-puzzle states are tile arrangements, and route search states are locations.",
+          "State-space search becomes difficult when the branching factor is high, the goal is deep, repeated states occur, or the number of states grows exponentially."
+        ],
+        bullets: [
+          "The notes use examples like water jug, 8-puzzle, N-queen, block world, and route/path search.",
+          "A state describes a configuration of the problem world.",
+          "An operator changes one state into another state.",
+          "Search evaluates possible paths and chooses a path to the goal using either blind or heuristic information."
+        ],
+        key: [
+          "Initial state: where the problem starts.",
+          "Goal test: checks whether the current state satisfies the desired condition.",
+          "Path cost or evaluation: used to compare possible paths.",
+          "Solution: the action sequence from start to goal."
+        ],
+        answerPlan: [
+          "Define state space",
+          "List components: initial state, actions, transition, goal test, cost",
+          "Draw or describe a small example",
+          "Explain search as exploring alternatives",
+          "Mention design issues: branching, depth, repeated states, cost"
+        ],
+        keywords: ["state", "operator", "initial state", "goal test", "path cost", "solution path"],
+        mistakes: [
+          "Do not describe only the goal; describe all states and legal actions.",
+          "Do not forget operators/actions.",
+          "In examples, write states clearly such as water-jug pair (x, y)."
+        ],
+        flow: ["Initial state", "Operators", "State space", "Goal state"]
+      },
+      {
+        id: "production-system",
+        icon: "P",
+        title: "Production System",
+        refs: "Handwritten pp. 23-30, Aakash pp. 56-57",
+        summary: "A production system represents knowledge as rules. Each production rule has a condition side and an action side; if the condition is satisfied, the rule can be applied and the database/state changes.",
+        theory: [
+          "A production system is a rule-based problem-solving model. Knowledge is represented as productions of the form IF condition THEN action/conclusion.",
+          "The working memory or database stores facts about the current situation. Rules are matched against this memory.",
+          "If more than one rule is applicable, the control strategy or conflict-resolution strategy chooses which rule should fire.",
+          "After a rule fires, the database/current state changes, and the cycle repeats until a goal, conclusion, or termination condition is reached.",
+          "The notes emphasize modularity and adaptability: rules can be added, removed, or replaced without redesigning the whole system."
+        ],
+        bullets: [
+          "Rules are fundamental building blocks of AI systems in the notes.",
+          "A control system chooses which applicable rule should fire.",
+          "The rule application changes the database or current problem state.",
+          "Production systems are modular, adaptable, and useful for problem solving, planning, decision making, and reasoning."
+        ],
+        key: [
+          "Rule format: IF condition THEN action/conclusion.",
+          "Monotonic systems do not remove facts after a rule is applied.",
+          "Partially commutative systems allow rule order to vary while reaching the same result.",
+          "Control strategy matters because it decides the sequence in which rules are tried."
+        ],
+        answerPlan: [
+          "Define production system",
+          "Write rule format",
+          "Explain components: rule set, working memory, control strategy",
+          "Describe match-select-act cycle",
+          "Add properties: monotonic, partially commutative, modular, adaptable"
+        ],
+        keywords: ["IF-THEN rule", "working memory", "control strategy", "rule firing", "monotonic", "commutative"],
+        mistakes: [
+          "Do not confuse production system with factory production.",
+          "Do not omit the control strategy; it is central in rule selection.",
+          "Mention how rules change the database/state."
+        ],
+        flow: ["Database/state", "Rule match", "Control strategy", "Rule fires"]
+      },
+      {
+        id: "agents",
+        icon: "A",
+        title: "Intelligent Agents: Agents and Environments",
+        refs: "Handwritten pp. 31-35, Aakash pp. 23, 66, 84",
+        summary: "An agent is anything that perceives its environment through sensors and acts upon that environment through actuators or effectors.",
+        theory: [
+          "An agent is best explained through the perception-action loop: environment gives percepts through sensors; the agent program maps percept history to actions; actuators affect the environment.",
+          "A rational agent chooses the action expected to maximize its performance measure, given its percept sequence and available knowledge.",
+          "PEAS is the standard exam format for specifying task environments: Performance measure, Environment, Actuators, Sensors.",
+          "The notes include human and machine examples. A human uses eyes/ears as sensors and hands/legs/mouth as effectors; a software or robot agent uses input devices, cameras, displays, motors, or system actions.",
+          "Agent characteristics include rationality, autonomy, adaptability/learning, and ability to interact with the environment."
+        ],
+        bullets: [
+          "Human agent: eyes, ears, and other organs are sensors; hands, legs, mouth, and other body parts are effectors.",
+          "Robot/software agent: sensors may include keyboard, camera, or input stream; actuators may include display, wheels, grippers, or output actions.",
+          "PEAS describes an agent task environment: Performance measure, Environment, Actuators, Sensors.",
+          "Agent action depends on percepts and the agent function/program."
+        ],
+        key: [
+          "Rationality: choose the best action based on percept sequence and knowledge.",
+          "Autonomy: act without constant human direction.",
+          "Adaptability/learning: improve from experience.",
+          "Agent types in notes include simple reflex and model-based reflex agents."
+        ],
+        answerPlan: [
+          "Define agent",
+          "Draw/explain environment-sensor-agent-actuator loop",
+          "Explain rationality and autonomy",
+          "Write PEAS expansion",
+          "Give one PEAS example such as medical diagnosis or aerospace/autonomous taxi"
+        ],
+        keywords: ["agent", "environment", "sensor", "actuator", "percept", "PEAS", "rationality", "autonomy"],
+        mistakes: [
+          "Do not write PEAS as only full forms; specify each part for the given system.",
+          "Do not confuse sensors with actuators.",
+          "For rationality, mention performance measure."
+        ],
+        flow: ["Sensors", "Percepts", "Agent", "Actuators"]
+      },
+      {
+        id: "search-methods",
+        icon: "M",
+        title: "Search Methods and Design Issues",
+        refs: "Handwritten pp. 48-52, Aakash pp. 57-58, 84-85, 92, 95",
+        summary: "Search methods are divided into uninformed search and informed or heuristic search. The design issue is how to represent states, choose operators, avoid bad paths, and control time and space.",
+        theory: [
+          "Search is the process of exploring possible action sequences in a state space until a goal state is found.",
+          "Uninformed search uses only the problem definition. Breadth First Search expands shallowest nodes first; Depth First Search follows one path deeply using stack/backtracking.",
+          "Informed search uses heuristic information to decide which states look promising. The notes list generate-and-test, hill climbing, best-first search, problem reduction, constraint satisfaction, and means-end analysis.",
+          "A good search answer should compare completeness, optimality, time complexity, and space complexity where relevant.",
+          "Design issues include choosing state representation, avoiding repeated states, selecting operators, choosing a control strategy, handling branching factor/depth, and deciding when heuristic guidance is acceptable."
+        ],
+        bullets: [
+          "Uninformed search has no extra information beyond the problem definition. Examples: Breadth First Search and Depth First Search.",
+          "Informed search uses heuristic information to judge whether one non-goal state is more promising than another.",
+          "Heuristic search reduces alternatives from exponential growth and can find good solutions in reasonable time.",
+          "Important issues include branching factor, depth, memory, completeness, optimality, repeated states, and local traps."
+        ],
+        key: [
+          "BFS explores level by level and can consume large memory.",
+          "DFS uses a stack/backtracking and has lower memory but can go deep forever without a cutoff.",
+          "Iterative deepening repeatedly runs depth-limited DFS with increasing depth.",
+          "AND-OR graphs represent problem reduction into subproblems."
+        ],
+        answerPlan: [
+          "Define search in AI",
+          "Classify into uninformed and informed search",
+          "Give examples of each",
+          "Compare BFS, DFS, and IDDFS if asked",
+          "Discuss design issues: representation, branching, depth, cost, completeness, memory"
+        ],
+        keywords: ["BFS", "DFS", "IDDFS", "informed search", "uninformed search", "heuristic", "branching factor"],
+        mistakes: [
+          "Do not say uninformed search has no information at all; it has the problem definition but no extra heuristic.",
+          "Do not claim DFS is always optimal.",
+          "In IDDFS, mention repeated depth-limited DFS."
+        ],
+        flow: ["Represent", "Generate", "Test/evaluate", "Choose next"]
+      },
+      {
+        id: "hill-climbing",
+        icon: "H",
+        title: "Heuristic Search and Hill Climbing",
+        refs: "Handwritten pp. 51-52, Aakash pp. 37, 68-70, 84-85, 92",
+        summary: "Hill climbing uses a heuristic/evaluation function to move toward better states. It is a local search method that decides what to do next by looking at immediate neighboring states.",
+        theory: [
+          "A heuristic is a rule of thumb or evaluation function that estimates how promising a state or path is. It helps reduce the number of alternatives considered during search.",
+          "Hill climbing is a local heuristic search method. It starts from an initial state, evaluates neighboring states, and moves to a better neighbor.",
+          "Simple hill climbing accepts the first better move. Steepest-ascent hill climbing evaluates all successors and chooses the best one.",
+          "Hill climbing is fast and memory-light, but it is not complete and may not find a global optimum.",
+          "The three standard limitations from the notes are local maximum, plateau, and ridge. Remedies include backtracking, keeping visited states, random restarts or big jumps, and moving in several directions."
+        ],
+        bullets: [
+          "Simple hill climbing selects and applies an operator, then keeps the new state if it improves the current state.",
+          "Steepest-ascent hill climbing evaluates all successors and selects the best successor.",
+          "The method works well sometimes, but it can stop at a local maximum, plateau, or ridge.",
+          "The notes suggest remedies such as backtracking, maintaining visited states, big jumps, random selection, or moving in several directions."
+        ],
+        key: [
+          "Local maximum: current state is better than neighbors but not globally best.",
+          "Plateau: neighboring states have the same value.",
+          "Ridge: available moves make it hard to climb directly toward the high region.",
+          "Heuristic function trades completeness or precision for speed."
+        ],
+        answerPlan: [
+          "Define heuristic search",
+          "Define hill climbing",
+          "Write simple algorithm steps",
+          "Explain simple vs steepest-ascent hill climbing",
+          "Explain limitations: local maximum, plateau, ridge, and remedies"
+        ],
+        keywords: ["heuristic function", "evaluation function", "local maximum", "plateau", "ridge", "steepest ascent"],
+        mistakes: [
+          "Do not write only advantages; limitations are frequently asked.",
+          "Do not confuse local maximum with global maximum.",
+          "For plateau and ridge, give short definitions."
+        ],
+        flow: ["Current state", "Evaluate successors", "Pick better state", "Stop or repeat"]
+      }
+    ];
+
+    const pyqs = [
+      { topic: "agents", year: "Mid-term 2023", marks: "short", q: "What is PEAS? Specify PEAS for an Aerospace System.", a: "Use PEAS: Performance measure, Environment, Actuators, Sensors. Aakash notes also give autonomous taxi/aerospace-style components: safety, destination/profit/laws; streets/freeways/weather/customers; steering/accelerator/brake/horn; camera, accelerometer, gauges, GPS." },
+      { topic: "agents", year: "Term 2016", marks: "4", q: "What do you understand by PEAS? Specify PEAS for a medical diagnostic system.", a: "Performance measure: healthy patient, minimal cost, no lawsuits. Environment: patient, hospital, pharmacy, doctors, nurses, equipment. Actuators and sensors depend on the system interface and medical instruments." },
+      { topic: "agents", year: "Term 2018", marks: "2.5", q: "Write PEAS descriptions for medical diagnosis or medical agents.", a: "Map the medical task into performance, environment, actuators, and sensors. The notes list health/system diagnosis, patient/hospital/pharmacy/doctors/nurses/equipment, screen/display, and keyboard/sensors." },
+      { topic: "agents", year: "Term 2016", marks: "2", q: "Define Intelligence, Artificial Intelligence, Agent, and Logical Reasoning.", a: "Intelligence is the general ability to reason, learn, and understand surroundings. AI creates intelligent machines/programs. An agent perceives through sensors and acts through effectors. Logical reasoning analyzes inference and arguments." },
+      { topic: "ai-definition", year: "End-term 2016", marks: "2.5", q: "How does Artificial Intelligence solve problems for which no practically feasible algorithm exists?", a: "The notes answer that AI systems are based on learning and use heuristic functions to find the best possible or near-optimal solution when exact algorithms are impractical." },
+      { topic: "ai-definition", year: "End-term 2016", marks: "2.5", q: "Differentiate between strong AI and weak AI.", a: "Strong AI aims at human-like reasoning and true intelligence. Weak AI creates computer-based systems that help solve problems in a specific domain without possessing full intelligence." },
+      { topic: "ai-definition", year: "End-term 2016", marks: "short", q: "Explain Turing Test. Why was Turing Test criticised? Explain Chinese Room argument.", a: "The notes describe Turing Test as an interrogator questioning a person and a machine separately; if the machine fools the interrogator, it is judged intelligent. The Chinese Room critique questions whether symbol manipulation means real understanding." },
+      { topic: "ai-definition", year: "Term 2017", marks: "5", q: "Explain origin and history of Artificial Intelligence.", a: "The notes timeline includes Capek's robot, neural-network foundations, Alan Turing and the Turing Test, McCarthy coining AI, LISP, ELIZA, Shakey, Stanford Cart, Deep Blue, and later advances in learning, planning, web crawlers, NLP, vision, and games." },
+      { topic: "ai-definition", year: "Term 2017", marks: "5", q: "Explain problem solving in AI.", a: "Problem solving is a systematic search through possible actions to reach a goal. The notes list four steps: goal formulation, problem formulation, search, and execute." },
+      { topic: "ai-definition", year: "Term 2017", marks: "5", q: "Explain different AI techniques.", a: "The notes list techniques from AI and related areas: NLP, finite-state morphology, parsing/generation, speech synthesis, machine learning in medicine, multilayer perceptrons, Gaussian mixture models, hidden Markov models, kernel methods, Bayesian networks, and neural-network tools." },
+      { topic: "state-space", year: "Term 2016", marks: "unit", q: "Write and explain state spaces. Use the water jug problem.", a: "Represent each jug configuration as a state, use fill/empty/pour operations as operators, start from the initial empty state, and search until the goal amount is present." },
+      { topic: "state-space", year: "Handwritten notes", marks: "example", q: "Explain N-queen problem as a state-space/search problem.", a: "The notes define N-queen as placing N queens on an N x N chessboard so no queens attack each other. States are partial placements; operators place queens; the goal has all queens placed safely." },
+      { topic: "production-system", year: "Notes/PYQ theme", marks: "long", q: "Explain production system and its components.", a: "A production system uses rules with condition and action parts. Working memory/database stores the current state; a rule matcher finds applicable rules; a control strategy chooses a rule; firing the rule updates the state." },
+      { topic: "production-system", year: "Term 2017", marks: "unit", q: "Solve a household robot problem using means-end analysis and production rules.", a: "The notes describe comparing current and goal states, selecting the most important difference, choosing an operator such as PUSH or CARRY, satisfying preconditions through subgoals, and applying the process recursively." },
+      { topic: "search-methods", year: "Term 2017", marks: "5", q: "Differentiate between Uninformed and Informed Search techniques with examples.", a: "Uninformed search has no extra state information beyond the problem definition, such as BFS and DFS. Informed or heuristic search uses task-specific information, such as generate-and-test, hill climbing, best-first search, problem reduction, constraint satisfaction, and means-end analysis." },
+      { topic: "search-methods", year: "Term 2018", marks: "5", q: "Compare the time complexity of Breadth First Search and Iterative Deepening Depth First Search.", a: "The notes compare BFS as generating nodes level by level and IDDFS as repeated depth-limited DFS. IDDFS revisits upper levels but most nodes are at the bottom, so the overhead is acceptable while memory remains small." },
+      { topic: "search-methods", year: "Term 2015", marks: "unit", q: "Explain Depth First Search.", a: "DFS uses a last-in-first-out stack and backtracking. It follows one path deeply, then backs up when needed. It has low memory but may go down a path forever without a cutoff and the first solution may not be optimal." },
+      { topic: "search-methods", year: "Mid-term 2023", marks: "5", q: "Explain Iterative Deepening Depth First Search with example.", a: "IDDFS calls depth-limited DFS for increasing depth limits. It combines DFS memory behavior with BFS-like discovery by depth, revisiting shallow nodes but avoiding BFS memory blow-up." },
+      { topic: "search-methods", year: "Term 2018", marks: "4", q: "Differentiate between OR graph and AND-OR graph.", a: "An OR graph represents alternative ways to solve a problem, where one branch can be enough. An AND-OR graph represents decomposition into subproblems where multiple branches may need to be solved together." },
+      { topic: "hill-climbing", year: "Mid-term 2023", marks: "5", q: "What is heuristic search? Explain Hill Climbing and its limitations.", a: "Heuristic search uses rules of thumb/evaluation functions to reduce alternatives and guide search. Hill climbing moves to better neighboring states, but can fail at local maxima, plateaus, and ridges." },
+      { topic: "hill-climbing", year: "End-term 2016", marks: "2.5", q: "What is heuristic search? Give an example.", a: "The notes define heuristic search as an AI search technique that uses heuristics to guide moves and reduce alternatives. Example: hill climbing search strategy." },
+      { topic: "hill-climbing", year: "Term 2017", marks: "unit", q: "Explain hill climbing search. What is the role of plateau and ridge in hill climbing?", a: "Hill climbing evaluates neighboring states and moves toward improvement. A plateau has equal-valued neighbors; a ridge is a high region hard to climb with the available moves." },
+      { topic: "hill-climbing", year: "Term 2018", marks: "unit", q: "What are the problems of Hill Climbing algorithm? In what way can they be dealt with?", a: "Problems include local maximum, plateau, and ridge. Remedies in the notes include backtracking, maintaining visited states, making big/random jumps, and trying several directions." },
+      { topic: "search-methods", year: "Term 2018", marks: "2.5", q: "What is a heuristic function? Explain its components.", a: "A heuristic is a technique for solving faster when classic methods are too slow or exact solutions are not practical. It estimates whether a path/state is good and trades cost, completeness, or precision for speed." }
+    ];
+
+    const quiz = [
+      { q: "Which PEAS part defines how success is judged?", options: ["Performance measure", "Environment", "Actuators", "Sensors"], answer: 0, note: "Performance measure states what counts as good behavior." },
+      { q: "Which search type uses no extra information beyond the problem definition?", options: ["Heuristic search", "Uninformed search", "Hill climbing", "Best-first search"], answer: 1, note: "The notes list BFS and DFS under uninformed search." },
+      { q: "What causes hill climbing to stop even when a better solution exists far away?", options: ["Initial state", "Local maximum", "Actuator", "Production memory"], answer: 1, note: "A local maximum is better than neighbors but not globally best." },
+      { q: "In a production system, what chooses among applicable rules?", options: ["Goal test", "Control strategy", "Sensor", "Branching factor"], answer: 1, note: "The control strategy decides which rule fires." },
+      { q: "Which problem-solving step decides successful world states?", options: ["Goal formulation", "Execute", "Backtracking", "Ridge repair"], answer: 0, note: "Goal formulation asks what successful states look like." }
+    ];
+
+    const topicList = document.getElementById("topicList");
+    const lesson = document.getElementById("lesson");
+    const search = document.getElementById("search");
+    const empty = document.getElementById("empty");
+    let activeTopic = "all";
+    let quizIndex = 0;
+
+    document.getElementById("topicCount").textContent = topics.length;
+    document.getElementById("questionCount").textContent = pyqs.length;
+
+    function byTopic(id) {
+      return pyqs.filter(item => item.topic === id).length;
+    }
+
+    function topicById(id) {
+      return topics.find(topic => topic.id === id);
+    }
+
+    function pyqCardsFor(topicId, term = "") {
+      const normalized = term.trim().toLowerCase();
+      const topicQuestions = pyqs.filter(item => {
+        const hay = `${item.q} ${item.a} ${item.year} ${item.marks}`.toLowerCase();
+        return item.topic === topicId && (!normalized || hay.includes(normalized));
+      });
+      if (!topicQuestions.length) {
+        return `<div class="empty" style="display:block">No PYQs matched this filter for this topic.</div>`;
+      }
+      return topicQuestions.map((item, index) => `
+        <article class="pyq-card">
+          <div class="pyq-q">${item.q}</div>
+          <div class="pyq-meta">
+            <span class="mini">${topicById(item.topic).title.split(":")[0]}</span>
+            <span class="mini">${item.year}</span>
+            <span class="mini">${item.marks} marks</span>
+          </div>
+          <button class="reveal" data-reveal="${topicId}-${index}">Reveal answer frame</button>
+          <div class="answer">${item.a}</div>
+        </article>
+      `).join("");
+    }
+
+    function renderTopicButtons() {
+      topicList.innerHTML = "";
+      const all = document.createElement("button");
+      all.className = "topic-btn active";
+      all.dataset.topic = "all";
+      all.innerHTML = `<span class="topic-icon">U</span><span><span class="topic-name">All Unit 1</span><span class="topic-meta">complete lesson path</span></span><span class="count">${pyqs.length}</span>`;
+      topicList.appendChild(all);
+
+      topics.forEach(topic => {
+        const btn = document.createElement("button");
+        btn.className = "topic-btn";
+        btn.dataset.topic = topic.id;
+        btn.innerHTML = `<span class="topic-icon">${topic.icon}</span><span><span class="topic-name">${topic.title.split(":")[0]}</span><span class="topic-meta">${topic.refs.split(",")[0]}</span></span><span class="count">${byTopic(topic.id)}</span>`;
+        topicList.appendChild(btn);
+      });
+    }
+
+    function topicCard(topic) {
+      const term = search.value.trim().toLowerCase();
+      const visibleQuestionCount = pyqs.filter(item => {
+        const hay = `${item.q} ${item.a} ${item.year} ${item.marks}`.toLowerCase();
+        return item.topic === topic.id && (!term || hay.includes(term));
+      }).length;
+      return `
+        <article class="topic-card" data-topic-card="${topic.id}">
+          <div class="topic-head">
+            <div>
+              <h3>${topic.title}</h3>
+              <div class="badge-row">
+                <span class="badge">${byTopic(topic.id)} PYQs</span>
+                <span class="badge">${topic.refs}</span>
+              </div>
+            </div>
+          </div>
+          <div class="topic-body">
+            <p class="summary">${topic.summary}</p>
+            <div class="diagram">
+              <div class="flow">
+                ${topic.flow.map(x => `<div class="node">${x}</div>`).join("")}
+              </div>
+            </div>
+            <div class="note-box wide">
+              <h4>In-depth theory</h4>
+              <ol>${topic.theory.map(x => `<li>${x}</li>`).join("")}</ol>
+            </div>
+            <div class="grid-2">
+              <div class="note-box">
+                <h4>From the notes</h4>
+                <ul>${topic.bullets.map(x => `<li>${x}</li>`).join("")}</ul>
+              </div>
+              <div class="note-box">
+                <h4>Exam-ready points</h4>
+                <ul>${topic.key.map(x => `<li>${x}</li>`).join("")}</ul>
+              </div>
+            </div>
+            <div class="exam-grid">
+              <div class="note-box">
+                <h4>How to write in exam</h4>
+                <ol>${topic.answerPlan.map(x => `<li>${x}</li>`).join("")}</ol>
+              </div>
+              <div class="note-box">
+                <h4>Keywords and mistakes</h4>
+                <ul>
+                  <li><strong>Keywords:</strong> ${topic.keywords.join(", ")}</li>
+                  ${topic.mistakes.map(x => `<li>${x}</li>`).join("")}
+                </ul>
+              </div>
+            </div>
+            <section class="note-box wide topic-pyqs" id="pyqs-${topic.id}">
+              <div class="panel-head">
+                <div>
+                  <h3>PYQs for this topic</h3>
+                  <p class="subtitle">Questions mapped to ${topic.title}</p>
+                </div>
+                <span class="count">${visibleQuestionCount}</span>
+              </div>
+              <div class="pyq-list">${pyqCardsFor(topic.id, term)}</div>
+            </section>
+            <div class="source">Source trace: ${topic.refs}. OCR was taken from the two PDFs supplied in the prompt; wording has been cleaned only where OCR errors distorted scanned text.</div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderLessons() {
+      const term = search.value.trim().toLowerCase();
+      const filtered = topics.filter(topic => {
+        const hay = `${topic.title} ${topic.summary} ${topic.bullets.join(" ")} ${topic.key.join(" ")}`.toLowerCase();
+        const topicMatch = activeTopic === "all" || activeTopic === topic.id;
+        const searchMatch = !term || hay.includes(term) || pyqs.some(q => q.topic === topic.id && `${q.q} ${q.a}`.toLowerCase().includes(term));
+        return topicMatch && searchMatch;
+      });
+      lesson.innerHTML = filtered.map(topicCard).join("");
+      empty.style.display = filtered.length ? "none" : "block";
+    }
+
+    function setActive(id) {
+      activeTopic = id;
+      document.querySelectorAll(".topic-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.topic === id));
+      renderLessons();
+    }
+
+    topicList.addEventListener("click", event => {
+      const btn = event.target.closest(".topic-btn");
+      if (!btn) return;
+      setActive(btn.dataset.topic);
+    });
+
+    search.addEventListener("input", () => {
+      renderLessons();
+    });
+
+    document.getElementById("clearSearch").addEventListener("click", () => {
+      search.value = "";
+      renderLessons();
+      search.focus();
+    });
+
+    lesson.addEventListener("click", event => {
+      const btn = event.target.closest(".reveal");
+      if (!btn) return;
+      btn.closest(".pyq-card").classList.toggle("open");
+      btn.textContent = btn.closest(".pyq-card").classList.contains("open") ? "Hide answer frame" : "Reveal answer frame";
+    });
+
+    document.getElementById("allBtn").addEventListener("click", () => {
+      setActive("all");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    document.getElementById("pyqBtn").addEventListener("click", () => {
+      const target = document.querySelector(".topic-pyqs");
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    document.getElementById("quizBtn").addEventListener("click", () => document.getElementById("quiz").scrollIntoView({ behavior: "smooth", block: "center" }));
+
+    function renderQuiz() {
+      const current = quiz[quizIndex % quiz.length];
+      document.getElementById("quizQuestion").textContent = current.q;
+      document.getElementById("quizFeedback").textContent = "";
+      document.getElementById("quizOptions").innerHTML = current.options.map((option, i) => `<button data-choice="${i}">${option}</button>`).join("");
+    }
+
+    document.getElementById("quizOptions").addEventListener("click", event => {
+      const btn = event.target.closest("button");
+      if (!btn) return;
+      const current = quiz[quizIndex % quiz.length];
+      const choice = Number(btn.dataset.choice);
+      document.querySelectorAll("#quizOptions button").forEach((option, i) => {
+        option.classList.toggle("correct", i === current.answer);
+        option.classList.toggle("wrong", i === choice && choice !== current.answer);
+      });
+      document.getElementById("quizFeedback").textContent = choice === current.answer ? `Correct. ${current.note}` : `Not quite. ${current.note}`;
+    });
+
+    document.getElementById("nextQuiz").addEventListener("click", () => {
+      quizIndex += 1;
+      renderQuiz();
+    });
+
+    renderTopicButtons();
+    renderLessons();
+    renderQuiz();
+  </script>
+</body>
+</html>
